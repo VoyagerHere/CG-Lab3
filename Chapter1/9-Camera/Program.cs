@@ -14,11 +14,13 @@ namespace LearnOpenTK
                 Title = "LearnOpenTK - Camera",
                 Flags = ContextFlags.ForwardCompatible,
             };
-
-            using (var window = new Window(GameWindowSettings.Default, nativeWindowSettings))
+            GameWindowSettings settings = new GameWindowSettings
             {
-                window.Run();
-            }
+                RenderFrequency = 1,
+                UpdateFrequency = 1
+            };
+            using var window = new Window(settings, nativeWindowSettings);
+            window.Run();
         }
     }
 }

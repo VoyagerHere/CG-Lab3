@@ -32,9 +32,7 @@ namespace LearnOpenTK
         {
             base.OnLoad();
 
-            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-            GL.Enable(EnableCap.DepthTest);
 
             _vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArrayObject);
@@ -46,20 +44,20 @@ namespace LearnOpenTK
             _shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             _shader.Use();
 
-            var vertexLocation = _shader.GetAttribLocation("aPosition");
+            var vertexLocation = _shader.GetAttribLocation("vPosition");
             GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-            var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
-            GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-
-            // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
             CursorGrabbed = true;
             _shader.SetVector3("uCamera.Position", Camera.Position);
             _shader.SetVector3("uCamera.View", Camera.View);
             _shader.SetVector3("uCamera.Up", Camera.Up);
             _shader.SetVector3("uCamera.Side", Camera.Side);
+            _shader.SetVector3("uCamera.Scale", Camera.Scale);
+
+            GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+            GL.Enable(EnableCap.DepthTest);
 
         }
 

@@ -56,6 +56,7 @@ struct SRay
 
 struct SIntersection
 {
+    // From camera to intersect point
     float Time;
     vec3 Point;
     vec3 Normal;
@@ -102,14 +103,14 @@ struct STracingRay
 
 // Camera (as uniform)
 uniform SCamera uCamera;
-
+uniform SLight  uLight;
 // Scene objects and their materials
 STriangle triangles[12];
 SSphere spheres[2];
 SMaterial materials[7];
 
 // Scene's light source position
-SLight light;
+// SLight light;
 
 void initializeDefaultScene(out STriangle triangles[12], out SSphere spheres[2])
 {
@@ -191,11 +192,11 @@ void initializeDefaultScene(out STriangle triangles[12], out SSphere spheres[2])
     spheres[1].MaterialIdx = 5;
 }
 
-void initializeDefaultLightMaterials(out SLight light, out SMaterial materials[7])
+void initializeDefaultLightMaterials(out SMaterial materials[7])
 {
     //** LIGHT **//
     //light.Position = vec3(2.0, 0.0, -5.0f);
-      light.Position = vec3(2, -1.0, -4.0f);
+    //  light.Position = vec3(2, -1.0, -4.0f);
 	
     // Phong's light ambient, diffuse and specular multipliers
     //vec4 lightCoefs = vec4(0.95, 0.98, 0.4, 512.0);
@@ -401,6 +402,7 @@ bool Raytrace(SRay ray, SSphere spheres[2], STriangle triangles[12], SMaterial m
 
 vec3 Phong(SIntersection intersect, SLight currLight, float shadow)
 {
+    // specular - from angles, reflect, diffuse - object color
     vec3 light = normalize(currLight.Position - intersect.Point);
     float diffuse = max(dot(light, intersect.Normal), 0.0);
     vec3 view = normalize(uCamera.Position - intersect.Point);
@@ -413,13 +415,15 @@ vec3 Phong(SIntersection intersect, SLight currLight, float shadow)
 
 float Shadow(SLight currLight, SIntersection intersect)
 {
+    //  falling shadow
     // Point is lighted
     float shadowing = 1.0;
     // Vector to the light source
     vec3 direction = normalize(currLight.Position - intersect.Point);
+    // Normalize for calculation
     // Distance to the light source
     float distanceLight = distance(currLight.Position, intersect.Point);
-    // Generating shadow ray for this light source
+    // Generating shadow ray for this light source (if intersect  - create shadow)
     SRay shadowRay = SRay(intersect.Point + direction * EPSILON, direction);
     
     // ...test intersection this ray with each scene object
@@ -471,7 +475,7 @@ void main(void)
 
     // Initializing scene objects, light position and materials
     initializeDefaultScene(triangles, spheres);
-    initializeDefaultLightMaterials(light, materials);
+    initializeDefaultLightMaterials(materials);
 
     // Defining initial ray - from the camera
     SRay ray = GenerateRay(uCamera);
@@ -484,6 +488,7 @@ void main(void)
 
     while(!isEmpty())
     {
+        // Second ray
         STracingRay trRay = popRay();
         ray = trRay.ray;
 
@@ -498,8 +503,8 @@ void main(void)
             {
                 case DIFFUSE_REFLECTION:
                 {
-                    float shadowing = Shadow(light, intersect);
-                    resultColor += trRay.contribution * Phong(intersect, light, shadowing);
+                    float shadowing = Shadow(uLight, intersect);
+                    resultColor += trRay.contribution * Phong(intersect, uLight, shadowing);
                     break;
                 }
 
@@ -508,8 +513,8 @@ void main(void)
                     if(intersect.ReflectionCoef < 1)
                     {
                         float contribution = trRay.contribution * (1 - intersect.ReflectionCoef);
-                        float shadowing = Shadow(light, intersect);
-                        resultColor += contribution * Phong(intersect, light, shadowing);
+                        float shadowing = Shadow(uLight, intersect);
+                        resultColor += contribution * Phong(intersect, uLight, shadowing);
                     }
                     vec3 reflectDirection = reflect(ray.Direction, intersect.Normal); // create reflection ray
                     float contribution = trRay.contribution * intersect.ReflectionCoef;

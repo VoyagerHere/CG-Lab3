@@ -65,30 +65,14 @@ namespace RayTracing
             _shaderProgram.SetVector3("uCamera.Up", new Vector3(0.0f, 1f, 0.0f));
             _shaderProgram.SetVector3("uCamera.Side", new Vector3(1.0f, 0.0f, 0.0f));
             _shaderProgram.SetVector2("uCamera.Scale", new Vector2(1.4f));
-            //camera.Position = vec3(0.0, 0.0, -8.0);
-            //camera.View = vec3(0.0, 0.0, 1.0);
-            //camera.Up = vec3(0.0, 1.0, 0.0);
-            //camera.Side = vec3(1.0, 0.0, 0.0);
-            //camera.Scale = vec2(1.0);
-
-            //Вычисления для сохранения пропорций
-            /*Vector2 v = new Vector2(1.0f);
-            if (Size.X >= Size.Y)
-                v.X = Size.X / (float)Size.Y;
-            else
-                v.Y = Size.Y / (float)Size.X;
-            //Где больше x или y у v, там возникает сжатие больше
-            _shaderProgram.SetVector2("uCamera.Scale", v);
-            */
+            _shaderProgram.SetVector3("uLight.Position", new Vector3(2, -1.0f, -4.0f));
         }
 
         protected override void OnUnload()
         {
-            //Отвязка всех ресурсов - установка в 0/null
             GL.BindVertexArray(0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.UseProgram(0);
-            //Очистка всех ресурсов
             GL.DeleteVertexArray(_vertexArrayObject);
             GL.DeleteBuffer(_vertexBufferObject);
         }
@@ -102,12 +86,7 @@ namespace RayTracing
             //Привязка буфера вершин
             GL.BindVertexArray(_vertexArrayObject);
 
-            //Указание использовать данную шейдерную программу
             _shaderProgram.Use();
-
-            
-            //Camera.RecalculateScale(Size.X, Size.Y);
-            //_shaderProgram.SetVector2("uCamera.Scale", Camera.Scale);
             
 
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);

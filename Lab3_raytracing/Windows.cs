@@ -13,9 +13,15 @@ namespace RayTracing
         private bool _firstMove = true;
 
         private Vector2 _lastPos;
+        Vector3 LightPos =  new Vector3(2, -1.0f, -4.0f);
 
+        private Vector3 _front = -Vector3.UnitZ;
 
-        private ShaderProgram _shaderProgram;
+        private Vector3 _up = Vector3.UnitY;
+
+        private Vector3 _right = Vector3.UnitX;
+
+    private ShaderProgram _shaderProgram;
 
         private float[] _vertices = {
             -1f, -1f, 0.0f, 
@@ -65,10 +71,10 @@ namespace RayTracing
             _shaderProgram.SetVector3("uCamera.Up", new Vector3(0.0f, 1f, 0.0f));
             _shaderProgram.SetVector3("uCamera.Side", new Vector3(1.0f, 0.0f, 0.0f));
             _shaderProgram.SetVector2("uCamera.Scale", new Vector2(1.4f));
-            _shaderProgram.SetVector3("uLight.Position", new Vector3(2, -1.0f, -4.0f));
-        }
+            _shaderProgram.SetVector3("uLight.Position", LightPos);
+    }
 
-        protected override void OnUnload()
+    protected override void OnUnload()
         {
             GL.BindVertexArray(0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -87,7 +93,8 @@ namespace RayTracing
             GL.BindVertexArray(_vertexArrayObject);
 
             _shaderProgram.Use();
-            
+            _shaderProgram.SetVector3("uLight.Position", LightPos);
+
 
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
             SwapBuffers();
@@ -97,14 +104,45 @@ namespace RayTracing
         {
             base.OnUpdateFrame(e);
             if (!IsFocused)
+            {
                 return;
+            }
 
             var input = KeyboardState;
 
-            //Закрытие окна на Esc
             if (input.IsKeyDown(Keys.Escape))
+            {
                 Close();
+            }
 
+            const float speed = 1.5f;
+
+            if (input.IsKeyDown(Keys.W))
+            {
+                LightPos += _front * speed * (float)e.Time;
+            }
+            if (input.IsKeyDown(Keys.S))
+            {
+                LightPos -= _front * speed * (float)e.Time;
+            }
+            if (input.IsKeyDown(Keys.A))
+            {
+                LightPos -= _right * speed * (float)e.Time;
+            }
+            if (input.IsKeyDown(Keys.D))
+            {
+                LightPos += _right * speed * (float)e.Time;
+            }
+
+
+            if (input.IsKeyDown(Keys.Space))
+            {
+                LightPos += _up * speed * (float)e.Time; // Up
+            }
+            if (input.IsKeyDown(Keys.LeftShift))
+            {
+                LightPos -= _up * speed * (float)e.Time; // Down
+            }
             // Get the mouse state
             var mouse = MouseState;
 
@@ -114,6 +152,7 @@ namespace RayTracing
                 _firstMove = false;
             }
             else
+
             {
                 // Calculate the offset of the mouse position
                 var deltaX = mouse.X - _lastPos.X;
@@ -127,6 +166,7 @@ namespace RayTracing
         {
             base.OnResize(e);
             GL.Viewport(0, 0, Size.X, Size.Y);
-        }
+
     }
+  }
 }
